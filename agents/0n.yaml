@@ -1,0 +1,6 @@
+interface:
+  display_name: "0n Core — Universal AI Command Center"
+  short_description: "Paste your 0n token. Access 91 services, 1171 tools. Describe outcomes, 0n executes."
+  version: "3.0.0"
+  author: "RocketOpp LLC"
+  homepage: "https://0ncore.com"
