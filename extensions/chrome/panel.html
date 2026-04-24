@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>0n Core</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d1117;--card:#161b22;--border:#30363d;--primary:#6EE05A;--blue:#00d4ff;--text:#e6edf3;--muted:#8b949e;--danger:#f85149}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,sans-serif;font-size:13px;width:380px;min-height:600px;overflow-x:hidden}
+button{cursor:pointer;border:none;font-family:inherit;font-size:13px}
+input,textarea,select{font-family:inherit;font-size:13px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:8px 10px;width:100%}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)}
+.btn{padding:8px 14px;border-radius:6px;font-weight:600;transition:.15s}
+.btn-primary{background:var(--primary);color:#0d1117}
+.btn-primary:hover{filter:brightness(1.1)}
+.btn-ghost{background:transparent;color:var(--primary);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--primary)}
+.btn-blue{background:var(--blue);color:#0d1117}
+.btn-blue:hover{filter:brightness(1.1)}
+.btn-danger{background:transparent;color:var(--danger);border:1px solid var(--border)}
+.btn-sm{padding:5px 10px;font-size:12px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px}
+.label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-green{background:rgba(110,224,90,.15);color:var(--primary)}
+.badge-blue{background:rgba(0,212,255,.15);color:var(--blue)}
+.badge-muted{background:rgba(139,148,158,.12);color:var(--muted)}
+.row{display:flex;gap:8px;align-items:center}
+.col{display:flex;flex-direction:column;gap:8px}
+.gap4{gap:4px}
+.gap12{gap:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.mt8{margin-top:8px}
+.mt12{margin-top:12px}
+.hidden{display:none!important}
+.text-muted{color:var(--muted)}
+.text-sm{font-size:12px}
+.text-xs{font-size:11px}
+.divider{border:none;border-top:1px solid var(--border);margin:10px 0}
+.pill{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;transition:.15s}
+.pill.active{background:rgba(110,224,90,.12);color:var(--primary);border-color:var(--primary)}
+.pill:hover{border-color:var(--primary);color:var(--primary)}
+
+/* Login */
+#login{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:600px;padding:32px 24px;gap:16px;text-align:center}
+#login svg{opacity:.85}
+#login h2{font-size:18px;font-weight:700;margin:4px 0}
+#login p{color:var(--muted);font-size:13px;max-width:280px;line-height:1.5}
+#login input{text-align:center;letter-spacing:.04em;font-family:monospace}
+#login .btn{width:100%;padding:10px}
+#login-error{color:var(--danger);font-size:12px;min-height:16px}
+
+/* Header */
+#header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border);background:var(--card)}
+#header .logo{display:flex;align-items:center;gap:7px;font-weight:700;font-size:14px}
+#header .plan-badge{font-size:10px}
+
+/* Tabs */
+#tabs{display:flex;border-bottom:1px solid var(--border);background:var(--card);overflow-x:auto}
+#tabs::-webkit-scrollbar{height:0}
+.tab{padding:9px 12px;font-size:11px;font-weight:600;color:var(--muted);background:transparent;border-bottom:2px solid transparent;white-space:nowrap;transition:.15s;text-transform:uppercase;letter-spacing:.04em}
+.tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+.tab:hover{color:var(--text)}
+
+/* Content */
+#content{padding:14px;display:flex;flex-direction:column;gap:12px}
+
+/* Home grid */
+.action-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:12px 6px;border-radius:8px;background:var(--card);border:1px solid var(--border);cursor:pointer;transition:.15s;font-size:11px;font-weight:600;color:var(--muted);text-align:center}
+.action-btn:hover{border-color:var(--primary);color:var(--primary)}
+.action-btn svg{flex-shrink:0}
+
+/* Profile card */
+.profile-card{display:flex;align-items:flex-start;gap:10px}
+.profile-avatar{width:44px;height:44px;border-radius:50%;background:var(--border);flex-shrink:0;object-fit:cover}
+.profile-avatar-placeholder{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--blue));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#0d1117;flex-shrink:0}
+.stat-box{background:rgba(110,224,90,.06);border:1px solid rgba(110,224,90,.18);border-radius:6px;padding:8px 10px;text-align:center}
+.stat-num{font-size:18px;font-weight:700;color:var(--primary)}
+.stat-lbl{font-size:10px;color:var(--muted);margin-top:1px}
+
+/* Leads */
+.lead-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+.lead-item:last-child{border-bottom:none}
+
+/* Output */
+.output-box{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px;font-size:13px;line-height:1.6;white-space:pre-wrap;word-break:break-word;max-height:220px;overflow-y:auto}
+.output-box:empty::before{content:"Output will appear here...";color:var(--muted)}
+
+/* Spinner */
+.spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Toast */
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--primary);color:var(--primary);padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;pointer-events:none;transition:opacity .3s;opacity:0;z-index:9999;white-space:nowrap}
+#toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Login Screen -->
+<div id="login">
+  <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#6EE05A" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+  <div>
+    <h2>0n Core</h2>
+    <p>One token. 91 services. 1,171 tools.</p>
+  </div>
+  <input type="text" id="token-input" placeholder="0n_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off" spellcheck="false" />
+  <div id="login-error"></div>
+  <button class="btn btn-primary" id="login-btn">Connect</button>
+  <p class="text-xs text-muted">Get your token at <a href="#" id="get-token-link" style="color:var(--primary)">0ncore.com/settings</a></p>
+</div>
+
+<!-- App Shell (hidden until authed) -->
+<div id="app" class="hidden">
+  <!-- Header -->
+  <div id="header">
+    <div class="logo">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6EE05A" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      0n Core
+    </div>
+    <span class="badge badge-green plan-badge" id="plan-badge">free</span>
+  </div>
+
+  <!-- Tabs -->
+  <div id="tabs">
+    <button class="tab active" data-tab="home">Home</button>
+    <button class="tab" data-tab="linkedin">LinkedIn</button>
+    <button class="tab" data-tab="compose">Compose</button>
+    <button class="tab" data-tab="leads">Leads</button>
+    <button class="tab" data-tab="site">Site</button>
+    <button class="tab" data-tab="crm">CRM</button>
+    <button class="tab" data-tab="settings">Settings</button>
+  </div>
+
+  <!-- Tab Content -->
+  <div id="content">
+
+    <!-- HOME -->
+    <div id="tab-home" class="col gap12">
+      <div class="card profile-card" id="home-profile-card">
+        <div class="profile-avatar-placeholder" id="home-avatar">?</div>
+        <div class="col gap4">
+          <div style="font-weight:600;font-size:14px" id="home-name">Loading...</div>
+          <div class="text-muted text-xs" id="home-email"></div>
+          <div class="row" style="gap:6px;flex-wrap:wrap" id="home-badges"></div>
+        </div>
+      </div>
+
+      <div class="grid2" id="home-stats" style="gap:8px">
+        <div class="stat-box"><div class="stat-num" id="stat-leads">—</div><div class="stat-lbl">Saved Leads</div></div>
+        <div class="stat-box"><div class="stat-num" id="stat-plan-tier">—</div><div class="stat-lbl">Plan Tier</div></div>
+      </div>
+
+      <div class="label">Quick Actions</div>
+      <div class="grid4">
+        <button class="action-btn" data-go="linkedin">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+          LinkedIn
+        </button>
+        <button class="action-btn" data-go="compose">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          Compose
+        </button>
+        <button class="action-btn" data-go="site">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          Site
+        </button>
+        <button class="action-btn" data-go="crm">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          CRM
+        </button>
+        <button class="action-btn" id="qa-blog">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Gen Blog
+        </button>
+        <button class="action-btn" id="qa-usecase">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Use Case
+        </button>
+        <button class="action-btn" id="qa-hipaa">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          HIPAA
+        </button>
+        <button class="action-btn" id="qa-dash">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </button>
+      </div>
+      <div id="qa-output" class="output-box hidden"></div>
+    </div>
+
+    <!-- LINKEDIN -->
+    <div id="tab-linkedin" class="col gap12 hidden">
+      <div class="card">
+        <div class="label">Page Detector</div>
+        <div class="row" style="justify-content:space-between;margin-top:6px">
+          <span class="text-muted text-sm" id="li-page-type">Detecting page...</span>
+          <span class="badge badge-muted" id="li-page-badge">—</span>
+        </div>
+      </div>
+      <div class="row">
+        <button class="btn btn-blue btn-sm" id="li-scrape-profile" style="flex:1">Scrape Profile</button>
+        <button class="btn btn-ghost btn-sm" id="li-scan-feed" style="flex:1">Scan Feed</button>
+        <button class="btn btn-ghost btn-sm" id="li-scrape-search" style="flex:1">Scrape Search</button>
+      </div>
+      <div id="li-spinner" class="hidden" style="text-align:center;padding:12px"><div class="spinner"></div></div>
+      <div id="li-profile-card" class="card hidden">
+        <div class="profile-card" style="margin-bottom:10px">
+          <img class="profile-avatar" id="li-avatar" src="" alt="" onerror="this.style.display='none'" />
+          <div class="col gap4">
+            <div style="font-weight:700;font-size:14px" id="li-name"></div>
+            <div class="text-muted text-xs" id="li-headline"></div>
+            <div class="text-xs" style="color:var(--blue)" id="li-location"></div>
+          </div>
+        </div>
+        <div class="text-sm" id="li-about" style="color:var(--muted);margin-bottom:10px;line-height:1.5;max-height:60px;overflow:hidden"></div>
+        <div id="li-experience-list" class="col gap4"></div>
+        <hr class="divider" />
+        <div class="row">
+          <button class="btn btn-primary btn-sm" id="li-save-lead" style="flex:1">Save Lead</button>
+          <button class="btn btn-ghost btn-sm" id="li-compose-from-profile" style="flex:1">Compose</button>
+          <button class="btn btn-blue btn-sm" id="li-push-crm" style="flex:1">Push to CRM</button>
+        </div>
+      </div>
+      <div id="li-feed-list" class="col gap4 hidden"></div>
+      <div id="li-search-list" class="col gap4 hidden"></div>
+    </div>
+
+    <!-- COMPOSE -->
+    <div id="tab-compose" class="col gap12 hidden">
+      <div>
+        <div class="label">Tone</div>
+        <div class="row mt8" style="flex-wrap:wrap;gap:6px">
+          <button class="pill active" data-tone="professional">Pro</button>
+          <button class="pill" data-tone="casual">Casual</button>
+          <button class="pill" data-tone="gap">Gap</button>
+          <button class="pill" data-tone="elevate">Elevate</button>
+          <button class="pill" data-tone="data">Data</button>
+          <button class="pill" data-tone="flip">Flip</button>
+        </div>
+      </div>
+      <div>
+        <div class="label">Type</div>
+        <select id="compose-type" class="mt8">
+          <option value="post">LinkedIn Post</option>
+          <option value="comment">Comment Reply</option>
+          <option value="connection">Connection Note</option>
+          <option value="message">DM Message</option>
+          <option value="email">Email</option>
+          <option value="general">General Content</option>
+        </select>
+      </div>
+      <div>
+        <div class="label">Prompt / Context</div>
+        <textarea id="compose-prompt" rows="4" class="mt8" placeholder="What do you want to say? Paste a profile, idea, or topic..."></textarea>
+      </div>
+      <button class="btn btn-primary" id="compose-generate">Generate</button>
+      <div id="compose-spinner" class="hidden" style="text-align:center;padding:8px"><div class="spinner"></div></div>
+      <div id="compose-output" class="output-box"></div>
+      <div class="row hidden" id="compose-actions">
+        <button class="btn btn-blue btn-sm" id="compose-insert" style="flex:1">Insert into LinkedIn</button>
+        <button class="btn btn-ghost btn-sm" id="compose-copy" style="flex:1">Copy</button>
+      </div>
+    </div>
+
+    <!-- LEADS -->
+    <div id="tab-leads" class="col gap12 hidden">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <span class="label" style="margin-bottom:0">Saved Leads (<span id="leads-count">0</span>)</span>
+        <div class="row" style="gap:6px">
+          <button class="btn btn-ghost btn-sm" id="leads-export">Export CSV</button>
+          <button class="btn btn-primary btn-sm" id="leads-sync-crm">Sync to CRM</button>
+        </div>
+      </div>
+      <div id="leads-list" class="col gap4"></div>
+      <div id="leads-empty" class="text-muted text-sm" style="text-align:center;padding:24px">No leads saved yet. Scrape LinkedIn profiles to add leads.</div>
+    </div>
+
+    <!-- SITE -->
+    <div id="tab-site" class="col gap12 hidden">
+      <div class="grid2">
+        <button class="btn btn-primary" id="site-blog">Generate Blog</button>
+        <button class="btn btn-ghost" id="site-usecase">Generate Use Case</button>
+      </div>
+      <div class="grid2">
+        <button class="btn btn-ghost" id="site-hipaa">HIPAA Scan</button>
+        <button class="btn btn-ghost" id="site-cro9">CRO9 Analysis</button>
+      </div>
+      <div id="site-spinner" class="hidden" style="text-align:center;padding:8px"><div class="spinner"></div></div>
+      <div id="site-output" class="output-box"></div>
+      <hr class="divider" />
+      <div class="label">Recent Blogs</div>
+      <div id="site-blogs-list" class="col gap4"><div class="text-muted text-xs">Loading...</div></div>
+      <div class="label">Recent Use Cases</div>
+      <div id="site-usecases-list" class="col gap4"><div class="text-muted text-xs">Loading...</div></div>
+    </div>
+
+    <!-- CRM -->
+    <div id="tab-crm" class="col gap12 hidden">
+      <div>
+        <div class="label">Search Contacts</div>
+        <div class="row mt8">
+          <input type="text" id="crm-search-input" placeholder="Name or email..." style="flex:1" />
+          <button class="btn btn-primary btn-sm mt8" id="crm-search-btn" style="margin-top:0;white-space:nowrap">Search</button>
+        </div>
+      </div>
+      <div id="crm-spinner" class="hidden" style="text-align:center;padding:8px"><div class="spinner"></div></div>
+      <div id="crm-results" class="col gap4"></div>
+      <hr class="divider" />
+      <div class="label">Push Current LinkedIn Profile</div>
+      <button class="btn btn-blue mt8" id="crm-push-current">Scrape + Push to CRM</button>
+      <div id="crm-push-result" class="output-box hidden"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="tab-settings" class="col gap12 hidden">
+      <div class="card">
+        <div class="label">Profile</div>
+        <div class="profile-card mt8">
+          <div class="profile-avatar-placeholder" id="settings-avatar">?</div>
+          <div class="col gap4">
+            <div style="font-weight:600" id="settings-name">—</div>
+            <div class="text-muted text-xs" id="settings-email">—</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="label">Plan</div>
+        <div class="row mt8" style="justify-content:space-between">
+          <span id="settings-plan">—</span>
+          <a href="#" id="settings-upgrade-link" class="badge badge-green text-xs" style="text-decoration:none">Upgrade</a>
+        </div>
+      </div>
+      <div class="card">
+        <div class="label">Brand Color</div>
+        <div class="row mt8">
+          <input type="color" id="settings-brand-color" value="#6EE05A" style="width:40px;height:32px;padding:2px;border-radius:4px;cursor:pointer;border:1px solid var(--border);background:none" />
+          <span class="text-muted text-sm" id="settings-brand-hex">#6EE05A</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="label">Default Tone</div>
+        <select id="settings-tone">
+          <option value="professional">Professional</option>
+          <option value="casual">Casual</option>
+          <option value="gap">Gap</option>
+          <option value="elevate">Elevate</option>
+          <option value="data">Data-Driven</option>
+          <option value="flip">Flip</option>
+        </select>
+      </div>
+      <div class="card">
+        <div class="label">Token</div>
+        <div class="text-xs" id="settings-token" style="font-family:monospace;color:var(--muted);word-break:break-all;margin-top:6px;line-height:1.5">—</div>
+      </div>
+      <button class="btn btn-danger" id="disconnect-btn">Disconnect</button>
+      <p class="text-xs text-muted" style="text-align:center">0n Core v3.0.0 · <a href="#" id="settings-console-link" style="color:var(--primary)">0ncore.com/console</a></p>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /app -->
+
+<script>
+const $ = id => document.getElementById(id);
+const CORE_URL = 'https://www.0ncore.com';
+const SUPABASE_URL = 'https://pwujhhmlrtxjmjzyttwn.supabase.co';
+
+let session = null;
+let leads = [];
+let currentProfile = null;
+let activeTab = 'home';
+let composeTone = 'professional';
+
+// --- Toast ---
+function toast(msg, dur = 2500) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+// --- BG Bridge ---
+function bg(type, data) {
+  return new Promise(r => chrome.runtime.sendMessage({ type, ...data }, r));
+}
+
+// --- Storage ---
+async function loadSession() {
+  return new Promise(r => chrome.storage.local.get(['0n_profile', '0n_token'], d => {
+    if (d['0n_profile'] && d['0n_token']) r({ profile: d['0n_profile'], token: d['0n_token'] });
+    else r(null);
+  }));
+}
+
+async function saveSession(token, profile) {
+  return new Promise(r => chrome.storage.local.set({ '0n_token': token, '0n_profile': profile }, r));
+}
+
+async function clearSession() {
+  return new Promise(r => chrome.storage.local.remove(['0n_token', '0n_profile'], r));
+}
+
+// --- Auth ---
+$('get-token-link').onclick = e => { e.preventDefault(); chrome.runtime.sendMessage({ type: 'OPEN_TAB', url: 'https://0ncore.com/settings' }); };
+$('settings-console-link').onclick = e => { e.preventDefault(); chrome.runtime.sendMessage({ type: 'OPEN_TAB', url: 'https://www.0ncore.com/console' }); };
+$('settings-upgrade-link').onclick = e => { e.preventDefault(); chrome.runtime.sendMessage({ type: 'OPEN_TAB', url: 'https://0ncore.com/upgrade' }); };
+
+$('login-btn').onclick = async () => {
+  const token = $('token-input').value.trim();
+  $('login-error').textContent = '';
+  if (!token.startsWith('0n_') || token.length !== 51) { $('login-error').textContent = 'Token must start with 0n_ and be 51 characters.'; return; }
+  $('login-btn').disabled = true;
+  $('login-btn').textContent = 'Verifying...';
+  const res = await bg('VERIFY_TOKEN', { token });
+  $('login-btn').disabled = false;
+  $('login-btn').textContent = 'Connect';
+  if (res?.error || !res?.profile) { $('login-error').textContent = res?.error || 'Token not found. Check 0ncore.com/settings'; return; }
+  await saveSession(token, res.profile);
+  session = { token, profile: res.profile };
+  initApp();
+};
+
+$('token-input').addEventListener('keydown', e => { if (e.key === 'Enter') $('login-btn').click(); });
+
+$('disconnect-btn').onclick = async () => {
+  await clearSession();
+  session = null;
+  $('app').classList.add('hidden');
+  $('login').classList.remove('hidden');
+  $('token-input').value = '';
+};
+
+// --- Init App ---
+function initApp() {
+  const p = session.profile;
+  $('login').classList.add('hidden');
+  $('app').classList.remove('hidden');
+
+  // Header
+  $('plan-badge').textContent = p.plan || 'free';
+
+  // Home profile
+  const initials = (p.full_name || p.email || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  $('home-avatar').textContent = initials;
+  $('home-name').textContent = p.full_name || p.email || 'User';
+  $('home-email').textContent = p.email || '';
+  const badges = $('home-badges');
+  badges.innerHTML = '';
+  if (p.plan) badges.innerHTML += `<span class="badge badge-green">${p.plan}</span>`;
+  if (p.role) badges.innerHTML += `<span class="badge badge-muted">${p.role}</span>`;
+
+  // Stats
+  loadLeads();
+  $('stat-plan-tier').textContent = p.plan || 'free';
+
+  // Settings
+  $('settings-avatar').textContent = initials;
+  $('settings-name').textContent = p.full_name || p.email || '—';
+  $('settings-email').textContent = p.email || '—';
+  $('settings-plan').textContent = p.plan || 'free';
+  $('settings-token').textContent = session.token ? session.token.slice(0, 12) + '···' : '—';
+
+  if (p.brand_color) {
+    $('settings-brand-color').value = p.brand_color;
+    $('settings-brand-hex').textContent = p.brand_color;
+    document.documentElement.style.setProperty('--primary', p.brand_color);
+  }
+
+  // Site tab: load content
+  loadSiteContent();
+
+  // Detect LinkedIn page
+  detectLinkedInPage();
+}
+
+// --- Tabs ---
+document.querySelectorAll('.tab').forEach(t => {
+  t.onclick = () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    activeTab = t.dataset.tab;
+    document.querySelectorAll('#content > div').forEach(x => x.classList.add('hidden'));
+    $(`tab-${activeTab}`)?.classList.remove('hidden');
+    if (activeTab === 'linkedin') detectLinkedInPage();
+    if (activeTab === 'leads') renderLeads();
+  };
+});
+
+// Quick action nav buttons
+document.querySelectorAll('[data-go]').forEach(b => {
+  b.onclick = () => document.querySelector(`.tab[data-tab="${b.dataset.go}"]`)?.click();
+});
+
+// --- Home Quick Actions ---
+async function runQuickAction(path, method = 'GET', body = null) {
+  const out = $('qa-output');
+  out.classList.remove('hidden');
+  out.textContent = 'Running...';
+  const res = await bg('CORE_API', { path, method, body });
+  out.textContent = JSON.stringify(res, null, 2);
+}
+
+$('qa-blog').onclick = () => runQuickAction('/api/cron/blog');
+$('qa-usecase').onclick = () => runQuickAction('/api/cron/use-cases');
+$('qa-hipaa').onclick = () => runQuickAction('/api/hipaa/scan', 'POST', { site: '' });
+$('qa-dash').onclick = () => bg('OPEN_TAB', { url: 'https://www.0ncore.com/console' });
+
+// --- LinkedIn Tab ---
+async function detectLinkedInPage() {
+  const [tab] = await new Promise(r => chrome.tabs.query({ active: true, currentWindow: true }, r));
+  if (!tab?.url?.includes('linkedin.com')) {
+    $('li-page-type').textContent = 'Not on LinkedIn';
+    $('li-page-badge').textContent = '—';
+    return;
+  }
+  const url = tab.url;
+  if (url.includes('/in/')) { $('li-page-type').textContent = 'Profile page'; $('li-page-badge').textContent = 'Profile'; $('li-page-badge').className = 'badge badge-blue'; }
+  else if (url.includes('/feed')) { $('li-page-type').textContent = 'Feed'; $('li-page-badge').textContent = 'Feed'; $('li-page-badge').className = 'badge badge-muted'; }
+  else if (url.includes('/search')) { $('li-page-type').textContent = 'Search results'; $('li-page-badge').textContent = 'Search'; $('li-page-badge').className = 'badge badge-muted'; }
+  else { $('li-page-type').textContent = 'LinkedIn'; $('li-page-badge').textContent = 'Other'; $('li-page-badge').className = 'badge badge-muted'; }
+}
+
+$('li-scrape-profile').onclick = async () => {
+  $('li-spinner').classList.remove('hidden');
+  $('li-profile-card').classList.add('hidden');
+  const data = await bg('TO_CONTENT', { payload: { type: 'DO_SCRAPE' } });
+  $('li-spinner').classList.add('hidden');
+  if (!data || data.error) { toast('No profile data found. Are you on a LinkedIn profile?'); return; }
+  currentProfile = data;
+  renderProfileCard(data);
+};
+
+$('li-scan-feed').onclick = async () => {
+  $('li-spinner').classList.remove('hidden');
+  const data = await bg('TO_CONTENT', { payload: { type: 'DO_SCAN_FEED' } });
+  $('li-spinner').classList.add('hidden');
+  $('li-feed-list').classList.remove('hidden');
+  $('li-search-list').classList.add('hidden');
+  $('li-profile-card').classList.add('hidden');
+  if (!data?.length) { $('li-feed-list').innerHTML = '<div class="text-muted text-xs">No feed posts found. Navigate to LinkedIn feed first.</div>'; return; }
+  $('li-feed-list').innerHTML = data.map(p => `<div class="card"><div style="font-weight:600;font-size:12px;margin-bottom:4px">${esc(p.author)}</div><div class="text-muted text-xs" style="line-height:1.5">${esc(p.content)}</div></div>`).join('');
+};
+
+$('li-scrape-search').onclick = async () => {
+  $('li-spinner').classList.remove('hidden');
+  const data = await bg('TO_CONTENT', { payload: { type: 'DO_SCRAPE_SEARCH' } });
+  $('li-spinner').classList.add('hidden');
+  $('li-search-list').classList.remove('hidden');
+  $('li-feed-list').classList.add('hidden');
+  $('li-profile-card').classList.add('hidden');
+  if (!data?.length) { $('li-search-list').innerHTML = '<div class="text-muted text-xs">No search results found. Run a LinkedIn search first.</div>'; return; }
+  $('li-search-list').innerHTML = data.map(r => `<div class="card row" style="justify-content:space-between"><div><div style="font-weight:600;font-size:12px">${esc(r.name)}</div><div class="text-muted text-xs">${esc(r.headline)}</div></div><a href="${esc(r.profileUrl)}" target="_blank" class="btn btn-ghost btn-sm" style="text-decoration:none;white-space:nowrap">View</a></div>`).join('');
+};
+
+function renderProfileCard(p) {
+  $('li-avatar').src = p.avatar || '';
+  $('li-name').textContent = p.name || 'Unknown';
+  $('li-headline').textContent = p.headline || '';
+  $('li-location').textContent = p.location || '';
+  $('li-about').textContent = p.about || '';
+  const expEl = $('li-experience-list');
+  if (p.experience?.length) {
+    expEl.innerHTML = '<div class="label">Experience</div>' + p.experience.slice(0, 3).map(e => `<div class="text-xs" style="line-height:1.5"><strong>${esc(e.title)}</strong> · ${esc(e.company)} <span class="text-muted">${esc(e.duration)}</span></div>`).join('');
+  } else expEl.innerHTML = '';
+  $('li-profile-card').classList.remove('hidden');
+}
+
+$('li-save-lead').onclick = () => {
+  if (!currentProfile) return;
+  if (!leads.find(l => l.url === currentProfile.url)) {
+    leads.push({ ...currentProfile, savedAt: new Date().toISOString() });
+    saveLeads();
+    $('stat-leads').textContent = leads.length;
+    toast('Lead saved');
+  } else toast('Already saved');
+};
+
+$('li-compose-from-profile').onclick = () => {
+  if (!currentProfile) return;
+  $('compose-prompt').value = `Profile: ${currentProfile.name}\nHeadline: ${currentProfile.headline}\nAbout: ${currentProfile.about?.slice(0, 200) || ''}`;
+  document.querySelector('.tab[data-tab="compose"]').click();
+};
+
+$('li-push-crm').onclick = async () => {
+  if (!currentProfile) return;
+  const res = await bg('CORE_API', { path: '/api/crm/contacts', method: 'POST', body: { name: currentProfile.name, headline: currentProfile.headline, linkedin_url: currentProfile.url, source: 'chrome_extension' } });
+  toast(res?.error ? 'CRM push failed' : 'Pushed to CRM');
+};
+
+// --- Compose Tab ---
+document.querySelectorAll('.pill[data-tone]').forEach(p => {
+  p.onclick = () => {
+    document.querySelectorAll('.pill[data-tone]').forEach(x => x.classList.remove('active'));
+    p.classList.add('active');
+    composeTone = p.dataset.tone;
+  };
+});
+
+$('compose-generate').onclick = async () => {
+  const prompt = $('compose-prompt').value.trim();
+  if (!prompt) { toast('Enter a prompt first'); return; }
+  $('compose-spinner').classList.remove('hidden');
+  $('compose-generate').disabled = true;
+  $('compose-output').textContent = '';
+  $('compose-actions').classList.add('hidden');
+  const res = await bg('CORE_API', { path: '/api/ai/compose', method: 'POST', body: { prompt, tone: composeTone, type: $('compose-type').value } });
+  $('compose-spinner').classList.add('hidden');
+  $('compose-generate').disabled = false;
+  const output = res?.output || res?.content || res?.text || JSON.stringify(res);
+  $('compose-output').textContent = output;
+  $('compose-actions').classList.remove('hidden');
+};
+
+$('compose-insert').onclick = async () => {
+  const text = $('compose-output').textContent;
+  if (!text) return;
+  const res = await bg('TO_CONTENT', { payload: { type: 'DO_INJECT', text } });
+  toast(res?.ok ? 'Inserted into LinkedIn' : 'Could not find text field. Click a post/comment box first.');
+};
+
+$('compose-copy').onclick = () => {
+  navigator.clipboard.writeText($('compose-output').textContent);
+  toast('Copied to clipboard');
+};
+
+// --- Leads ---
+function loadLeads() {
+  chrome.storage.local.get(['0n_leads'], d => {
+    leads = d['0n_leads'] || [];
+    $('stat-leads').textContent = leads.length;
+    if (activeTab === 'leads') renderLeads();
+  });
+}
+
+function saveLeads() {
+  chrome.storage.local.set({ '0n_leads': leads });
+}
+
+function renderLeads() {
+  $('leads-count').textContent = leads.length;
+  const list = $('leads-list');
+  const empty = $('leads-empty');
+  if (!leads.length) { list.innerHTML = ''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  list.innerHTML = leads.map((l, i) => `
+    <div class="lead-item">
+      <div class="col gap4">
+        <div style="font-weight:600;font-size:13px">${esc(l.name || 'Unknown')}</div>
+        <div class="text-xs text-muted">${esc(l.headline || '')}</div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="removeLead(${i})">Remove</button>
+    </div>
+  `).join('');
+}
+
+window.removeLead = i => { leads.splice(i, 1); saveLeads(); renderLeads(); $('stat-leads').textContent = leads.length; };
+
+$('leads-export').onclick = () => {
+  const rows = [['Name','Headline','Location','URL','Saved At'], ...leads.map(l => [l.name, l.headline, l.location, l.url, l.savedAt])];
+  const csv = rows.map(r => r.map(c => `"${(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv,' + encodeURIComponent(csv);
+  a.download = '0n-leads.csv';
+  a.click();
+  toast('Exported CSV');
+};
+
+$('leads-sync-crm').onclick = async () => {
+  if (!leads.length) { toast('No leads to sync'); return; }
+  toast('Syncing to CRM...');
+  const res = await bg('CORE_API', { path: '/api/crm/bulk-import', method: 'POST', body: { contacts: leads } });
+  toast(res?.error ? 'Sync failed' : `Synced ${leads.length} leads`);
+};
+
+// --- Site Tab ---
+async function loadSiteContent() {
+  const blogs = await bg('SUPABASE', { table: 'blog_posts', select: 'id,title,created_at', limit: 5 });
+  const blogList = $('site-blogs-list');
+  if (Array.isArray(blogs) && blogs.length) {
+    blogList.innerHTML = blogs.map(b => `<div class="text-xs" style="padding:4px 0;border-bottom:1px solid var(--border)">${esc(b.title || 'Untitled')} <span class="text-muted">${new Date(b.created_at).toLocaleDateString()}</span></div>`).join('');
+  } else blogList.innerHTML = '<div class="text-muted text-xs">No blogs found.</div>';
+
+  const cases = await bg('SUPABASE', { table: 'use_cases', select: 'id,title,created_at', limit: 5 });
+  const caseList = $('site-usecases-list');
+  if (Array.isArray(cases) && cases.length) {
+    caseList.innerHTML = cases.map(c => `<div class="text-xs" style="padding:4px 0;border-bottom:1px solid var(--border)">${esc(c.title || 'Untitled')} <span class="text-muted">${new Date(c.created_at).toLocaleDateString()}</span></div>`).join('');
+  } else caseList.innerHTML = '<div class="text-muted text-xs">No use cases found.</div>';
+}
+
+async function siteAction(path, method = 'GET', body = null) {
+  $('site-spinner').classList.remove('hidden');
+  $('site-output').textContent = '';
+  const res = await bg('CORE_API', { path, method, body });
+  $('site-spinner').classList.add('hidden');
+  $('site-output').textContent = JSON.stringify(res, null, 2);
+  loadSiteContent();
+}
+
+$('site-blog').onclick = () => siteAction('/api/cron/blog');
+$('site-usecase').onclick = () => siteAction('/api/cron/use-cases');
+$('site-hipaa').onclick = () => siteAction('/api/hipaa/scan', 'POST', {});
+$('site-cro9').onclick = () => siteAction('/api/provision/cro9', 'POST', {});
+
+// --- CRM Tab ---
+$('crm-search-btn').onclick = async () => {
+  const q = $('crm-search-input').value.trim();
+  if (!q) return;
+  $('crm-spinner').classList.remove('hidden');
+  const res = await bg('CORE_API', { path: `/api/crm/contacts?q=${encodeURIComponent(q)}` });
+  $('crm-spinner').classList.add('hidden');
+  const contacts = res?.contacts || res?.data || (Array.isArray(res) ? res : []);
+  if (!contacts.length) { $('crm-results').innerHTML = '<div class="text-muted text-xs">No contacts found.</div>'; return; }
+  $('crm-results').innerHTML = contacts.slice(0, 10).map(c => `<div class="card"><div style="font-weight:600;font-size:13px">${esc(c.firstName||'')} ${esc(c.lastName||'')}</div><div class="text-xs text-muted">${esc(c.email||'')} · ${esc(c.phone||'')}</div></div>`).join('');
+};
+
+$('crm-search-input').addEventListener('keydown', e => { if (e.key === 'Enter') $('crm-search-btn').click(); });
+
+$('crm-push-current').onclick = async () => {
+  $('crm-push-result').classList.add('hidden');
+  const scrape = await bg('TO_CONTENT', { payload: { type: 'DO_SCRAPE' } });
+  if (!scrape?.name) { toast('Scrape a LinkedIn profile first'); return; }
+  const res = await bg('CORE_API', { path: '/api/crm/contacts', method: 'POST', body: { name: scrape.name, headline: scrape.headline, linkedin_url: scrape.url, source: 'chrome_extension' } });
+  $('crm-push-result').classList.remove('hidden');
+  $('crm-push-result').textContent = JSON.stringify(res, null, 2);
+  toast(res?.error ? 'Push failed' : 'Pushed to CRM');
+};
+
+// --- Settings ---
+$('settings-brand-color').oninput = e => {
+  const c = e.target.value;
+  $('settings-brand-hex').textContent = c;
+  document.documentElement.style.setProperty('--primary', c);
+};
+
+// --- Helpers ---
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// --- Bootstrap ---
+(async () => {
+  const stored = await loadSession();
+  if (stored) { session = stored; initApp(); }
+})();
+
+// --- Background message listener (for context menu actions from background) ---
+chrome.runtime.onMessage.addListener((msg) => {
+  if (msg.type === 'PANEL_ACTION') {
+    if (msg.action === 'scraped' && msg.data) {
+      currentProfile = msg.data;
+      document.querySelector('.tab[data-tab="linkedin"]').click();
+      renderProfileCard(msg.data);
+    }
+    if (msg.action === 'compose') {
+      document.querySelector('.tab[data-tab="compose"]').click();
+      if (msg.text) $('compose-prompt').value = msg.text;
+      if (msg.context?.name) $('compose-prompt').value = `Profile: ${msg.context.name}\nHeadline: ${msg.context.headline || ''}\n`;
+    }
+    if (msg.action === 'feed' && msg.data) {
+      document.querySelector('.tab[data-tab="linkedin"]').click();
+    }
+    if (msg.action === 'execute' && msg.text) {
+      document.querySelector('.tab[data-tab="compose"]').click();
+      $('compose-prompt').value = msg.text;
+    }
+  }
+});
+</script>
+</body>
+</html>
