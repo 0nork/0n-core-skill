@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "0n Core — Site Manager",
+  "version": "3.0.0",
+  "description": "The 0nCore ecosystem in your browser. LinkedIn AI engine, CRM, 91 services, 1171 tools. Paste your 0n token, you're in.",
+  "permissions": ["storage", "activeTab", "sidePanel", "tabs", "contextMenus"],
+  "host_permissions": ["https://www.linkedin.com/*", "https://pwujhhmlrtxjmjzyttwn.supabase.co/*", "https://www.0ncore.com/*"],
+  "side_panel": { "default_path": "panel.html" },
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [{
+    "matches": ["https://www.linkedin.com/*"],
+    "js": ["linkedin.js"],
+    "css": ["linkedin.css"],
+    "run_at": "document_idle"
+  }],
+  "action": {
+    "default_icon": { "16": "icons/16.png", "48": "icons/48.png", "128": "icons/128.png" },
+    "default_title": "0n Core — Open Site Manager"
+  },
+  "icons": { "16": "icons/16.png", "48": "icons/48.png", "128": "icons/128.png" }
+}
