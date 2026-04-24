@@ -1,6 +1,6 @@
 # 0n Core Skill
 
-Universal skill file for the 0n ecosystem. One token, 91 services, 1,171 tools.
+Universal skill file for the 0n ecosystem. One token, 96 services, 1,554 tools.
 
 ## Install
 
@@ -19,6 +19,26 @@ Then type `/0n` in Claude Code.
 
 ## Platforms
 
-Works across Claude Code, Chrome, Slack, WordPress, Dispatch, and any future 0n integration.
+| Platform | Location | Auth | Notes |
+|----------|----------|------|-------|
+| Claude Code | `/extensions/claude-code/` | Session config | Full CLI integration |
+| Chrome Extension | `/extensions/chrome/` | Side panel | LinkedIn overlay + VPIS |
+| Slack | `/extensions/slack/` | Slash commands | `/0n connect 0n_token` |
+| WordPress | `/extensions/wordpress/` | Settings page | wp_options storage |
+| ChatGPT | `/extensions/chatgpt/` | GPT Actions | Custom GPT + OpenAPI schema |
+| Gemini | `/extensions/gemini/` | Function calling | Gem + function declarations |
+
+## Quick Start by Platform
+
+### ChatGPT Custom GPT
+See `extensions/chatgpt/README.md` — import `openapi.yaml` as GPT Actions, paste `system-prompt.md` as instructions.
+
+### Google Gemini Gem
+See `extensions/gemini/README.md` — paste `system-prompt.md` as system instructions, load `function-declarations.json` for function calling.
+
+### Claude Code
+```bash
+cp extensions/claude-code/session-config.json ~/.0n/session.json
+```
 
 Built by [RocketOpp LLC](https://rocketopp.com) — [0ncore.com](https://0ncore.com)

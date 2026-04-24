@@ -1,0 +1,403 @@
+openapi: 3.0.0
+info:
+  title: 0n Core API
+  description: Universal AI Command Center — 1,554 tools across 96 services. All endpoints require a valid 0n_ bearer token.
+  version: 1.0.0
+  contact:
+    name: RocketOpp LLC
+    url: https://0ncore.com
+
+servers:
+  - url: https://www.0ncore.com
+    description: 0n Core production API
+
+security:
+  - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 0n_ access token (format: 0n_ + 48 hex chars)
+
+  schemas:
+    Profile:
+      type: object
+      properties:
+        id:
+          type: string
+        full_name:
+          type: string
+        company_name:
+          type: string
+        plan:
+          type: string
+          enum: [free, starter, pro, agency]
+        connected_services:
+          type: array
+          items:
+            type: string
+        brand_voice:
+          type: string
+        industry:
+          type: string
+        crm_location_id:
+          type: string
+
+    TokenVerifyRequest:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+          description: The 0n_ access token to verify
+          pattern: "^0n_[a-f0-9]{48}$"
+
+    TokenVerifyResponse:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        profile:
+          $ref: "#/components/schemas/Profile"
+        error:
+          type: string
+
+    ComposeRequest:
+      type: object
+      required: [prompt, type]
+      properties:
+        prompt:
+          type: string
+          description: The content topic or brief
+        type:
+          type: string
+          enum: [blog, email, social, use_case, landing_page, ad_copy]
+          description: Type of content to generate
+        tone:
+          type: string
+          description: Override brand tone (optional — defaults to profile brand_voice)
+        length:
+          type: string
+          enum: [short, medium, long]
+          default: medium
+
+    ComposeResponse:
+      type: object
+      properties:
+        content:
+          type: string
+          description: Generated content
+        type:
+          type: string
+        word_count:
+          type: integer
+        model:
+          type: string
+          description: AI model used (always Groq on backend)
+
+    ExecuteRequest:
+      type: object
+      required: [command]
+      properties:
+        command:
+          type: string
+          description: Natural language command to execute against connected services
+        context:
+          type: object
+          description: Optional additional context
+          additionalProperties: true
+
+    ExecuteResponse:
+      type: object
+      properties:
+        result:
+          type: string
+          description: Human-readable result summary
+        data:
+          type: object
+          description: Structured response data
+          additionalProperties: true
+        services_used:
+          type: array
+          items:
+            type: string
+        execution_time_ms:
+          type: integer
+
+    BlogResponse:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        meta_description:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        word_count:
+          type: integer
+
+    UseCaseResponse:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        industry:
+          type: string
+        services:
+          type: array
+          items:
+            type: string
+
+    HipaaScanRequest:
+      type: object
+      required: [url]
+      properties:
+        url:
+          type: string
+          format: uri
+          description: URL to scan for HIPAA compliance issues
+
+    HipaaScanResponse:
+      type: object
+      properties:
+        url:
+          type: string
+        score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        tier:
+          type: string
+          enum: [tier1, tier2, tier3, tier4]
+        issues:
+          type: array
+          items:
+            type: object
+            properties:
+              check:
+                type: string
+              status:
+                type: string
+                enum: [pass, fail, warning]
+              detail:
+                type: string
+        passed:
+          type: integer
+        failed:
+          type: integer
+        warnings:
+          type: integer
+
+    AddonExecuteRequest:
+      type: object
+      properties:
+        inputs:
+          type: object
+          description: Add-on specific input parameters
+          additionalProperties: true
+
+    AddonExecuteResponse:
+      type: object
+      properties:
+        result:
+          type: string
+        data:
+          type: object
+          additionalProperties: true
+        addon_slug:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+        message:
+          type: string
+
+paths:
+  /api/auth/verify-token:
+    post:
+      operationId: verify_token
+      summary: Verify a 0n_ access token
+      description: Validates a 0n_ token and returns the user's full profile including plan, connected services, and brand settings.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TokenVerifyRequest"
+      responses:
+        "200":
+          description: Token verification result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenVerifyResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/ai/compose:
+    post:
+      operationId: compose
+      summary: Generate AI content using the user's brand voice
+      description: Creates blog posts, emails, social content, and more via Groq on the backend. Uses the user's brand voice, industry, and tone from their profile.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ComposeRequest"
+      responses:
+        "200":
+          description: Generated content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComposeResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/ai/execute:
+    post:
+      operationId: execute_command
+      summary: Execute a natural language command
+      description: Routes a plain-English command to the appropriate connected services and executes it. CRM updates, Stripe charges, email sends — all via natural language.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExecuteRequest"
+      responses:
+        "200":
+          description: Execution result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExecuteResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/cron/blog:
+    get:
+      operationId: generate_blog
+      summary: Generate a full blog post
+      description: Generates a complete SEO-optimized blog post using the user's brand settings and industry. Content is generated via Groq on the backend.
+      responses:
+        "200":
+          description: Generated blog post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/cron/use-cases:
+    get:
+      operationId: generate_use_case
+      summary: Generate a use case document
+      description: Creates a targeted use case showing how 0n Core applies to the user's industry and connected services.
+      responses:
+        "200":
+          description: Generated use case
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UseCaseResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/hipaa/scan:
+    post:
+      operationId: hipaa_scan
+      summary: Run a HIPAA compliance scan
+      description: Scans a URL for HIPAA compliance issues across 63 checks in 4 tiers. Returns score, tier, individual check results, and remediation guidance.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HipaaScanRequest"
+      responses:
+        "200":
+          description: Scan results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HipaaScanResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/addons/{slug}/execute:
+    post:
+      operationId: execute_addon
+      summary: Execute a 0n Core add-on
+      description: Runs a specific add-on by its slug identifier with provided inputs.
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The add-on slug identifier (e.g., crm-sync, social-post, invoice-gen)
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddonExecuteRequest"
+      responses:
+        "200":
+          description: Add-on execution result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AddonExecuteResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Add-on not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"

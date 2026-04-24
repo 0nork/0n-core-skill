@@ -1,0 +1,44 @@
+{
+  "name": "0n Core",
+  "description": "Universal AI Command Center — 1,554 tools across 96 services. Paste your 0n token, describe any outcome.",
+  "system_instructions_file": "system-prompt.md",
+  "function_declarations_file": "function-declarations.json",
+  "model": "gemini-2.0-flash",
+  "temperature": 0.7,
+  "top_p": 0.95,
+  "max_output_tokens": 8192,
+  "tools": [
+    {
+      "function_calling": true,
+      "function_declarations_file": "function-declarations.json"
+    }
+  ],
+  "safety_settings": {
+    "harassment": "BLOCK_NONE",
+    "hate_speech": "BLOCK_NONE",
+    "sexually_explicit": "BLOCK_MEDIUM_AND_ABOVE",
+    "dangerous_content": "BLOCK_NONE"
+  },
+  "api_base_url": "https://www.0ncore.com",
+  "auth": {
+    "type": "bearer",
+    "token_format": "0n_{48-char-hex}",
+    "header": "Authorization"
+  },
+  "example_conversations": [
+    {
+      "user": "Hello",
+      "model": "Welcome to 0n Core. Paste your 0n_ token to connect your ecosystem. Don't have one? Get it at 0ncore.com."
+    },
+    {
+      "user": "Write a blog post about AI for small business",
+      "model": "[verify token first if not provided, then call compose with type=blog]"
+    },
+    {
+      "user": "Scan mysite.com for HIPAA compliance",
+      "model": "[call hipaa_scan with url=https://mysite.com]"
+    }
+  ],
+  "made_by": "RocketOpp LLC",
+  "website": "https://0ncore.com"
+}

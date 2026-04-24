@@ -53,6 +53,8 @@ User executes their first natural language command against a live service. Under
 | Chrome Extension | Paste in side panel | chrome.storage.local |
 | Slack | `/0n connect 0n_xxx` | Supabase |
 | WordPress | Settings page | wp_options |
+| ChatGPT | Paste in chat, Bearer via GPT Actions | GPT conversation context |
+| Gemini | Paste in chat, Bearer via function calls | Gem conversation context |
 | Dispatch | Session context | Dispatch state |
 
 ## API Reference

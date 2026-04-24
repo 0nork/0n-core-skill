@@ -1,0 +1,98 @@
+{
+  "function_declarations": [
+    {
+      "name": "verify_token",
+      "description": "Verify a 0n_ access token and retrieve the user's full profile including plan, connected services, brand voice, and industry. Always call this first when a user provides their token.",
+      "parameters": {
+        "type": "OBJECT",
+        "properties": {
+          "token": {
+            "type": "STRING",
+            "description": "The user's 0n_ access token. Format: 0n_ followed by 48 hex characters. Example: 0n_a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6"
+          }
+        },
+        "required": ["token"]
+      }
+    },
+    {
+      "name": "compose",
+      "description": "Generate AI content (blog posts, emails, social posts, use cases, landing pages, ad copy) using the user's brand voice and industry profile. All generation runs through Groq on the 0ncore.com backend.",
+      "parameters": {
+        "type": "OBJECT",
+        "properties": {
+          "prompt": {
+            "type": "STRING",
+            "description": "The content topic, brief, or instructions. Be specific about subject matter, target audience, and key points to cover."
+          },
+          "type": {
+            "type": "STRING",
+            "description": "Type of content to generate.",
+            "enum": ["blog", "email", "social", "use_case", "landing_page", "ad_copy"]
+          },
+          "tone": {
+            "type": "STRING",
+            "description": "Optional tone override. If not provided, uses the user's brand_voice from their profile. Examples: professional, conversational, technical, casual, authoritative."
+          },
+          "length": {
+            "type": "STRING",
+            "description": "Desired content length. Defaults to medium.",
+            "enum": ["short", "medium", "long"]
+          }
+        },
+        "required": ["prompt", "type"]
+      }
+    },
+    {
+      "name": "execute",
+      "description": "Execute a natural language command against the user's connected services. Routes to CRM, Stripe, email, social, and any other connected service. Use this for actions like creating contacts, sending emails, updating opportunities, posting to social, and any outcome the user describes.",
+      "parameters": {
+        "type": "OBJECT",
+        "properties": {
+          "command": {
+            "type": "STRING",
+            "description": "Plain English description of the action to execute. Be specific. Examples: 'Create a contact for John Smith at Acme Corp', 'Send a follow-up email to leads tagged hot', 'Post this content to LinkedIn'."
+          },
+          "context": {
+            "type": "OBJECT",
+            "description": "Optional additional context or data to pass with the command. Can include structured data like contact fields, content to post, filter criteria, etc.",
+            "properties": {
+              "data": {
+                "type": "STRING",
+                "description": "Any structured data as JSON string"
+              }
+            }
+          }
+        },
+        "required": ["command"]
+      }
+    },
+    {
+      "name": "generate_blog",
+      "description": "Generate a complete SEO-optimized blog post using the user's brand settings and industry. Returns title, full content, meta description, and tags. Content generated via Groq on backend.",
+      "parameters": {
+        "type": "OBJECT",
+        "properties": {
+          "topic": {
+            "type": "STRING",
+            "description": "Optional topic override. If not provided, 0ncore.com generates a topic based on the user's industry and trending subjects."
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "hipaa_scan",
+      "description": "Run a HIPAA compliance scan against a URL. Checks 63 criteria across 4 tiers and returns a score (0-100), tier classification, individual check results, and remediation guidance for any failures.",
+      "parameters": {
+        "type": "OBJECT",
+        "properties": {
+          "url": {
+            "type": "STRING",
+            "description": "The full URL to scan including protocol. Example: https://acmeclinic.com or https://patientportal.hospital.org/login"
+          }
+        },
+        "required": ["url"]
+      }
+    }
+  ]
+}

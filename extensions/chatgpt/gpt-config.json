@@ -1,0 +1,70 @@
+{
+  "name": "0n Core",
+  "description": "Universal AI Command Center — 1,554 tools across 96 services. Paste your 0n token, describe any outcome.",
+  "instructions_file": "system-prompt.md",
+  "conversation_starters": [
+    "Connect my 0n_ token",
+    "Write a blog post about AI automation",
+    "Scan my site for HIPAA compliance issues",
+    "What can I do with my current plan?"
+  ],
+  "capabilities": {
+    "web_browsing": false,
+    "image_generation": false,
+    "code_interpreter": false
+  },
+  "actions": [
+    {
+      "name": "verify_token",
+      "description": "Verify a 0n_ access token and retrieve user profile, plan, and connected services",
+      "method": "POST",
+      "path": "/api/auth/verify-token"
+    },
+    {
+      "name": "compose",
+      "description": "Generate AI content (blog, email, social post, use case) using the user's brand voice via Groq on the backend",
+      "method": "POST",
+      "path": "/api/ai/compose"
+    },
+    {
+      "name": "execute_command",
+      "description": "Execute a natural language command against the user's connected services",
+      "method": "POST",
+      "path": "/api/ai/execute"
+    },
+    {
+      "name": "generate_blog",
+      "description": "Generate a full blog post using the user's brand settings",
+      "method": "GET",
+      "path": "/api/cron/blog"
+    },
+    {
+      "name": "generate_use_case",
+      "description": "Generate a use case document using the user's industry and services",
+      "method": "GET",
+      "path": "/api/cron/use-cases"
+    },
+    {
+      "name": "hipaa_scan",
+      "description": "Run a HIPAA compliance scan against a given URL",
+      "method": "POST",
+      "path": "/api/hipaa/scan"
+    },
+    {
+      "name": "execute_addon",
+      "description": "Execute a specific 0n Core add-on by slug",
+      "method": "POST",
+      "path": "/api/addons/{slug}/execute"
+    }
+  ],
+  "api_base_url": "https://www.0ncore.com",
+  "auth": {
+    "type": "bearer",
+    "token_format": "0n_{48-char-hex}",
+    "header": "Authorization"
+  },
+  "privacy_policy": "https://0ncore.com/privacy",
+  "profile_picture": "https://0ncore.com/logo.png",
+  "made_by": "RocketOpp LLC",
+  "website": "https://0ncore.com"
+}
